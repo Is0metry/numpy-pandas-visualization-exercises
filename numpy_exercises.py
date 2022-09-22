@@ -1,19 +1,25 @@
 import numpy as np
+#setup
 a = np.array([4, 10, 12, 23, -2, -1, 0, 0, 0, -6, 3, -7])
-
+#Q1-How many negative numbers are there?
 print(f'There are {(a < 0).sum()} negative values')
+#Q2-How many positive numbers are there?
 print(f'There are {(a > 0).sum()} positive values')
+#Q3-How many even positive numbers are there?
 even_positive = np.bitwise_and(a > 0, a % 2 == 0).sum()
 print(f'There are {even_positive} even positive values.')
+#Q4-If you were to add 3 to each data point, how many positive numbers would there be?
 b = a+3
 even_positive = np.bitwise_and(b > 0, b % 2 == 0).sum()
 print(f'There are {even_positive} even positive values if you add 3.')
+#Q5-If you squared each number, what would the new mean and standard deviation be?
 b = a ** 2
 print(f'the mean after squaring is {b.mean()} and the standard deviation is {b.std()}')
-
+#Q6-Center the data set
 a_mean = a.mean()
 b = a - a_mean
-print(f'centered falues are:\n {b}.')
+print(f'centered values are:\n {b}.')
+#Q7-Calculate the z-score for each data point.
 z = b / a.std()
 print(f'z-scores for the data points: \n {z}')
 
