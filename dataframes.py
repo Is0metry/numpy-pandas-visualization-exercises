@@ -48,58 +48,58 @@ print(df)
 print()
 
 # Q2-Load the mpg dataset. Read the documentation for the dataset and use it for the following questions:
-mpg = data('mpg')
+mpg_df = data('mpg')
 # Pt. 1-How many rows and columns are there?
 print('Part 1:')
-print(mpg.shape)
+print(mpg_df.shape)
 print()
 
 # Pt. 2-What are the data types of each column?
 print('Part 2:')
-print(mpg.dtypes)
+print(mpg_df.dtypes)
 print()
 
 # Pt. 3-Summarize the dataframe with .info and .describe
 print('Part 3:')
-print(mpg.describe())
-print(mpg.info())
+print(mpg_df.describe())
+print(mpg_df.info())
 print()
 # Pt. 4 & 5-rename cty to city and hwy to highway
 print('Part 4:')
-mpg = mpg.rename(columns={'cty':'city','hwy':'highway'})
-print(mpg)
+mpg_df = mpg_df.rename(columns={'cty':'city','hwy':'highway'})
+print(mpg_df)
 print()
 # Pt. 6-Do any cars have better city mileage than highway mileage?
 print('Part 6:')
-cty_gt_hwy = mpg[mpg.city > mpg.highway]
+cty_gt_hwy = mpg_df[mpg_df.city > mpg_df.highway]
 print(cty_gt_hwy)
 #nope (no hybrids I guess?)
 print()
 # Pt. 7-Create a column named mileage_difference this column should contain the difference between highway and city mileage for each car.
 print('Part 7:')
-mpg['mileage_difference'] = mpg.highway - mpg.city
-print(mpg[['manufacturer','model','mileage_difference']])
+mpg_df['mileage_difference'] = mpg_df.highway - mpg_df.city
+print(mpg_df[['manufacturer','model','mileage_difference']])
 print()
 # Pt. 8-Which car (or cars) has the highest mileage difference
 print('Part 8:')
-print(mpg[['manufacturer','model','mileage_difference']][mpg.mileage_difference == mpg.mileage_difference.max()])
+print(mpg_df[['manufacturer','model','mileage_difference']][mpg_df.mileage_difference == mpg_df.mileage_difference.max()])
 print()
 # Pt. 9-Which compact class car has the lowest highway mileage? The best?
 print('Part 9:')
-compacts = mpg[mpg['class'] == 'compact'] #have to get the column this way otherwise python freaks out on the class keyword
+compacts_df = mpg_df[mpg_df['class'] == 'compact'] #have to get the column this way otherwise python freaks out on the class keyword
 print('Lowest highway MPG:')
-print(compacts[['manufacturer','model','highway']][compacts.highway == compacts.highway.min()])
+print(compacts_df[['manufacturer','model','highway']][compacts_df.highway == compacts_df.highway.min()])
 print('Highest highway MPG:')
-print(compacts[['manufacturer','model','highway']][compacts.highway == compacts.highway.max()])
+print(compacts_df[['manufacturer','model','highway']][compacts_df.highway == compacts_df.highway.max()])
 print()
 # Pt. 10-Create a column named average_mileage that is the mean of the city and highway mileage.
 print('Part 10:')
-mpg['average_mileage'] = (mpg.city + mpg.highway) / 2
-print(mpg[['manufacturer','year','model','average_mileage']])
+mpg_df['average_mileage'] = (mpg_df.city + mpg_df.highway) / 2
+print(mpg_df[['manufacturer','year','model','average_mileage']])
 print()
 # Pt. 11- Which dodge car has the best average mileage? The worst?
 print('Part 11:')
-dodges = mpg[['model','year','average_mileage']][mpg.manufacturer == 'dodge']
+dodges = mpg_df[['model','year','average_mileage']][mpg_df.manufacturer == 'dodge']
 print(f'Best mileage:\n {dodges[dodges.average_mileage == dodges.average_mileage.max()]}')
 print(f'Worst mileage:\n {dodges[dodges.average_mileage == dodges.average_mileage.min()]}')
 print()
