@@ -1,25 +1,26 @@
 from datetime import date
+from turtle import title
 from env import host,user,password,get_db_url
 from pydataset import data
 import sqlalchemy
 import pandas as pd
 import numpy as np
 
-mysql_limit = 10000
-run_tuple = (True,True,True)
+mysql_limit = 10
+run_tuple = (False,False,True)
 # enforce_limit is a helper function which returns a LIMIT clause if limit_on is >0. This is to 
 # help with performance while debugging
 def enforce_limit(limit):
-    return f'LIMIT {limit};' if limit > 0 else ';'
+    return f' LIMIT {limit};' if limit > 0 else ';'
 
 #Q3-Create a function named get_db_url. It should accept a username, hostname, password, 
 # and database name and return a url connection string formatted like in the example at the start of this lesson.
 '''see helpers.py for get_db_url function'''
+url = get_db_url(host,user,password,'employees')
 # Q4-Use your function to obtain a connection to the employees database.
 if run_tuple[0]:
     print(f'Q4:')
 
-    url = get_db_url(host,user,password,'employees')
 
     employees_df = pd.read_sql('SELECT * FROM employees LIMIT 50;',url)
     print(employees_df.head(5))
@@ -164,8 +165,7 @@ if run_tuple[1]:
     mpg['mileage_difference'] = mpg.highway - mpg.city
 
     #Q13-Create a column named average_mileage like you did in the DataFrames exercises; this is the mean of the city and highway mileage.
-    mpg['average_mileage'] = (mpg.city + mpg.highway) / 2
-
+    mpg['average_mileage'] = round(2 / ((1/mpg.highway) + (1/mpg.city)), 2)
     # Q14-Create a new column on the mpg dataset named is_automatic that holds boolean values denoting whether the car has an automatic transmission.
     print(f'Q14:')
     mpg['is_automatic'] = np.where(mpg.transmission.str.startswith('a'),True,False)
@@ -183,4 +183,62 @@ if run_tuple[1]:
     automatics = mpg[mpg.is_automatic].average_mileage.mean()
     manuals = mpg[~mpg.is_automatic].average_mileage.mean()
     print(f'{"automatic" if automatics > manuals else "manual"} transmissions have beter mileage than {"manual" if automatics > manuals else "automatic"} ones.')
+    print('\n\n\n')
+#Exercises III
+if run_tuple[2]:
+    print('EXERCISES III\n')
+    # Q1-Use your get_db_url function to help you explore the data from the chipotle database.
+    print(f'Q1:')
+    chipotle_url = get_db_url(host,user,password,'chipotle')
+    # chipotle only has 1 tabl
+    orders_df = pd.read_sql('SELECT * FROM orders;',chipotle_url)
+    print(orders_df.dtypes)
+    #converting price into numeric values
+    orders_df.item_price = orders_df.item_price.apply(lambda p: pd.to_numeric(p[1:]))
+    print(orders_df[['id','order_id','quantity','item_name','item_price']])
     print()
+    # Q2-What is the total price for each order?
+    print(f'Q2:')
+    order_sums = orders_df.groupby('order_id').agg('sum').drop(columns=['id']).rename({'item_price':'order_total'})
+    print(order_sums)
+    print()
+
+    # Q3-What are the 3 most popular items?
+    print(f'Q3:')
+    items_ordered = orders_df.groupby('item_name').quantity.sum().sort_values(ascending=False).head(3)
+    print(f'Three most popular items:\n{items_ordered}')
+    print()
+    
+    # Q4-Which item has produced the most revenue?
+    print(f'Q4:')
+    item_revenue = orders_df.groupby('item_name').item_price.sum().sort_values(ascending=False).head(1)
+    print(f'{item_revenue.index[0]} has produced the most revenue at ${round(item_revenue[0],2)}')
+    print()
+
+    # Q5-Join the employees and titles DataFrames together.
+    print(f'Q5:')
+    #if the database hasn't been loaded in by running Exercises I, load it in
+    try:
+        len(employees_df)
+    except NameError:
+        employees_df = pd.read_sql(f'SELECT * FROM employees{enforce_limit(mysql_limit)}',url)
+        titles_df = pd.read_sql(f'SELECT * FROM titles{enforce_limit(mysql_limit)}',url)
+    employee_title_df = employees_df.merge(titles_df, left_on='emp_no',right_on='emp_no',how='inner')
+    print(employee_title_df.head())
+    print()
+    # Q6-For each title, find the hire date of the employee that was hired most recently with that title.
+    print(f'Q6:')
+    employee_title_df['hire_date'] = pd.to_datetime(employee_title_df['hire_date'])
+    most_recent_hire = employee_title_df.groupby('title').hire_date.idxmax()
+    print(employee_title_df[['title','emp_no','first_name','last_name','hire_date']].iloc[most_recent_hire])
+    print()
+
+    # Q7-Write the code necessary to create a cross tabulation of the number of titles by department.
+    print(f'Q7:')
+    q7_query = '''SELECT t.emp_no, t.title, t.to_date, d.dept_name
+	FROM departments as d
+	JOIN dept_emp AS e USING(dept_no)
+	JOIN titles AS t USING(emp_no);'''
+    dept_titles_df = pd.read_sql(q7_query,url)
+    titles_crosstab = pd.crosstab(dept_titles_df.dept_name, dept_titles_df.title)
+    print(titles_crosstab)
